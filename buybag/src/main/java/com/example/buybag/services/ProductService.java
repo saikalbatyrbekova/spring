@@ -1,40 +1,38 @@
 package com.example.buybag.services;
 
 import com.example.buybag.models.Product;
+import com.example.buybag.repositories.ProductRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class ProductService {
-    private List<Product> products = new ArrayList<>();
-    private long idCounter = 0;
 
-    {
-        products.add(new Product(++idCounter, "MICHAEL KORS bag", "Medium Saffiano Leather Satchel", 358, "New-York", "Michael Kors"));
-        products.add(new Product(++idCounter, "MICHAEL KORS bag", "Mila Small Metallic Leather Shoulder Bag", 258, "New-York", "Michael Kors"));
-    }
+    private final ProductRepository productRepository;
 
-    public List<Product> listProducts() {
-        return products;
+    public List<Product> listProducts(String title) {
+        if (title != null)
+            return productRepository.findByTitle(title);
+        else
+            return productRepository.findAll();
     }
 
     public void saveProduct(Product product) {
-        product.setId(++idCounter);
-        products.add(product);
+        log.info("Saving new {}", product);
+        productRepository.save(product);
     }
 
     public void deleteProductById(Long id) {
-        products.removeIf(product -> product.getId().equals(id));
+        productRepository.deleteById(id);
     }
 
     public Product getProductById(Long id) {
-        for (Product product : products) {
-            if (product.getId().equals(id)) {
-                return product;
-            }
-        }
-        return null;
+        return productRepository.findById(id).orElse(null);
     }
 }
